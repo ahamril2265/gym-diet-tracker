@@ -5,7 +5,7 @@ import { Chip } from '../../components/Chip'
 import { cx } from '../../components/cx'
 import { Segmented } from '../../components/Segmented'
 import type { FoodSource, Macros, Meal, Serving } from '../../db/types'
-import { MEAL_LABEL, MEALS, formatQty, portionLabel, scaleMacros } from '../../lib/calc/nutrition'
+import { MEAL_LABEL, MEALS, formatQty, portionLabel, portionStep, scaleMacros, stepQuantity } from '../../lib/calc/nutrition'
 
 export interface PortionFood {
   name: string
@@ -26,7 +26,8 @@ export interface PortionResult {
 
 const GRAMS: Serving = { label: 'g', grams: 1 }
 
-const HALF_STEP_UNITS = new Set(['katori', 'small katori', 'plate', 'bowl', 'glass', 'cup', '½ cup', 'serving'])
+const r1 = (n: number) => Math.round(n * 10) / 10
+
 
 /** Reopens the serving an entry was logged with; falls back to grams if that serving no longer exists. */
 function initialState(options: Serving[], initial?: { label: string; grams: number; qty: number }) {
@@ -68,7 +69,7 @@ export function PortionPicker({ food, initial, meal: initialMeal, submitLabel, o
   const grams = valid ? Math.round(opt.grams * qty * 10) / 10 : 0
   const macros = scaleMacros(food.per100g, grams)
   // Measures (katori, glass…) step by halves; countable things (roti, idli, egg…) by whole units.
-  const step = isGrams ? 10 : HALF_STEP_UNITS.has(opt.label) ? 0.5 : 1
+  const step = isGrams ? 10 : portionStep(opt.label)
 
   const choose = (i: number) => {
     const next = options[i] ?? GRAMS
@@ -81,10 +82,7 @@ export function PortionPicker({ food, initial, meal: initialMeal, submitLabel, o
   }
 
   const bump = (dir: 1 | -1) => {
-    const base = valid ? qty : 0
-    // Snap to the next multiple of the step in that direction (1.5 roti → 2 or 1, not 2.5).
-    const units = dir > 0 ? Math.floor(base / step + 1e-9) + 1 : Math.ceil(base / step - 1e-9) - 1
-    setQtyText(formatQty(Math.max(step, units * step)))
+    setQtyText(formatQty(stepQuantity(valid ? qty : 0, step, dir)))
   }
 
   const badge = food.source ? SOURCE_BADGE[food.source] : undefined
@@ -117,7 +115,7 @@ export function PortionPicker({ food, initial, meal: initialMeal, submitLabel, o
             {food.approximate && <Chip className="h-6 px-2 text-[10px]">Approx. · IFCT/NIN</Chip>}
             {badge && <Chip tone="accent" className="h-6 px-2 text-[10px]">{badge}</Chip>}
             <span className="num text-[12px] font-semibold text-faint">
-              per 100 g: {Math.round(food.per100g.kcal)} kcal · P {food.per100g.protein} · C {food.per100g.carbs} · F {food.per100g.fat}
+              per 100 g: {Math.round(food.per100g.kcal)} kcal · P {r1(food.per100g.protein)} · C {r1(food.per100g.carbs)} · F {r1(food.per100g.fat)}
             </span>
           </div>
         </div>

@@ -17,18 +17,22 @@ interface Draft {
   servings: { label: string; grams: string }[]
 }
 
-const toDraft = (f: Food | null, name: string): Draft =>
-  f
+export type FoodPrefill = Partial<Pick<Food, 'name' | 'brand' | 'per100g' | 'servings' | 'barcode' | 'imageUrl' | 'packQuantity'>>
+
+const toDraft = (food: Food | null, name: string, initial?: FoodPrefill): Draft => {
+  const f = food || initial ? ({ ...food, ...initial } as Partial<Food>) : null
+  return f && f.per100g
     ? {
-        name: f.name,
+        name: f.name ?? name,
         brand: f.brand ?? '',
         kcal: String(f.per100g.kcal),
         protein: String(f.per100g.protein),
         carbs: String(f.per100g.carbs),
         fat: String(f.per100g.fat),
-        servings: f.servings.map((s) => ({ label: s.label, grams: String(s.grams) })),
+        servings: (f.servings ?? []).map((s) => ({ label: s.label, grams: String(s.grams) })),
       }
-    : { name, brand: '', kcal: '', protein: '', carbs: '', fat: '', servings: [{ label: 'serving', grams: '' }] }
+    : { name: f?.name ?? name, brand: f?.brand ?? '', kcal: '', protein: '', carbs: '', fat: '', servings: [{ label: 'serving', grams: '' }] }
+}
 
 const num = (s: string) => (s.trim() === '' ? Number.NaN : Number(s.replace(',', '.')))
 
@@ -37,21 +41,26 @@ export interface FoodEditorSheetProps {
   /** Food to edit, or null to create one. */
   food: Food | null
   initialName?: string
+  /** Values to start from (e.g. read from a nutrition label). Overrides the food's own values. */
+  initial?: FoodPrefill
+  /** Shown above the form, e.g. "Read by AI — check the numbers". */
+  note?: string
+  title?: string
   onClose: () => void
   onSaved: (id: string) => void
 }
 
 /** Create a food or edit any food (including built-in ones). Values are per 100 g, like Indian labels. */
-export function FoodEditorSheet({ open, food, initialName = '', onClose, onSaved }: FoodEditorSheetProps) {
-  const [draft, setDraft] = useState<Draft>(() => toDraft(food, initialName))
+export function FoodEditorSheet({ open, food, initialName = '', initial, note, title, onClose, onSaved }: FoodEditorSheetProps) {
+  const [draft, setDraft] = useState<Draft>(() => toDraft(food, initialName, initial))
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (open) {
-      setDraft(toDraft(food, initialName))
+      setDraft(toDraft(food, initialName, initial))
       setError(null)
     }
-  }, [open, food, initialName])
+  }, [open, food, initialName, initial])
 
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }))
   const p = num(draft.protein)
@@ -85,9 +94,9 @@ export function FoodEditorSheet({ open, food, initialName = '', onClose, onSaved
       brand: draft.brand.trim() || undefined,
       per100g: { kcal: k, protein: p, carbs: c, fat: f },
       servings,
-      barcode: food?.barcode,
-      imageUrl: food?.imageUrl,
-      packQuantity: food?.packQuantity,
+      barcode: initial?.barcode ?? food?.barcode,
+      imageUrl: initial?.imageUrl ?? food?.imageUrl,
+      packQuantity: initial?.packQuantity ?? food?.packQuantity,
       aliases: food?.aliases,
     })
     onSaved(id)
@@ -102,7 +111,7 @@ export function FoodEditorSheet({ open, food, initialName = '', onClose, onSaved
   )
 
   return (
-    <BottomSheet open={open} onClose={onClose} title={food ? 'Edit food' : 'New food'}>
+    <BottomSheet open={open} onClose={onClose} title={title ?? (food ? 'Edit food' : 'New food')}>
       <form
         className="flex flex-col gap-4 p-4"
         onSubmit={(e) => {
@@ -110,6 +119,7 @@ export function FoodEditorSheet({ open, food, initialName = '', onClose, onSaved
           void save()
         }}
       >
+        {note && <p className="rounded-btn-sm border border-flame/40 bg-flame/10 px-3 py-2 text-[13px] font-semibold text-flame">{note}</p>}
         <Field label="Name">
           {(fp) => <input {...fp} className="input" maxLength={60} value={draft.name} onChange={(e) => set({ name: e.target.value })} />}
         </Field>

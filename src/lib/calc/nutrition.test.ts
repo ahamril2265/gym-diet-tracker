@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SEED_FOODS } from '../../db/seed/indianFoods'
 import { searchFoods } from '../foodSearch'
-import { mealForTime, per100FromPortion, percentChange, portionLabel, scaleMacros, sumMacros } from './nutrition'
+import { mealForTime, per100FromPortion, percentChange, portionLabel, portionStep, scaleMacros, stepQuantity, sumMacros } from './nutrition'
 import { computeStreak } from './streak'
 
 describe('scaleMacros', () => {
@@ -24,6 +24,18 @@ describe('scaleMacros', () => {
         { kcal: 163, protein: 9.8, carbs: 22.5, fat: 3.8 },
       ]),
     ).toEqual({ kcal: 374, protein: 17, carbs: 62.5, fat: 5.7 })
+  })
+})
+
+describe('portion steppers', () => {
+  it('steps measures by halves and countable things by whole units', () => {
+    expect(portionStep('katori')).toBe(0.5)
+    expect(portionStep('Glass')).toBe(0.5)
+    expect(portionStep('roti')).toBe(1)
+    expect(stepQuantity(1.5, 1, 1)).toBe(2)
+    expect(stepQuantity(1.5, 1, -1)).toBe(1)
+    expect(stepQuantity(1.5, 0.5, 1)).toBe(2)
+    expect(stepQuantity(1, 1, -1)).toBe(1) // never below one step
   })
 })
 

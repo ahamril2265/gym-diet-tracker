@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Camera, ScanBarcode, Search } from 'lucide-react'
-import { useCallback, useState } from 'react'
-import { Link } from 'react-router'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { MacroBar } from '../../components/MacroBar'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { ScreenSkeleton } from '../../components/Skeleton'
@@ -29,6 +29,16 @@ export default function EatScreen() {
   const [editing, setEditing] = useState<FoodLog | null>(null)
   const [toast, setToast] = useState<{ message: string; undo?: () => void } | null>(null)
   const dismiss = useCallback(() => setToast(null), [])
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // A toast handed over by another screen (e.g. "Added 3 items" after a camera scan), shown once.
+  useEffect(() => {
+    const message = (location.state as { toast?: string } | null)?.toast
+    if (!message) return
+    setToast({ message })
+    navigate(location.pathname + location.search, { replace: true, state: null })
+  }, [location, navigate])
 
   if (!targets || !logs || !prevCounts) return <ScreenSkeleton />
 

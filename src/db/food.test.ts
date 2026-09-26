@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from './db'
-import { addLog, addWater, copyMeal, deleteLog, recentFoods, restoreLog, saveFood } from './food'
+import { addLog, addWater, cacheOffFood, copyMeal, customFoodByBarcode, deleteLog, foodByBarcode, recentFoods, restoreLog, saveFood } from './food'
 import { initDb } from './init'
 import type { NewLog } from './food'
 
@@ -77,5 +77,32 @@ describe('water', () => {
     expect(await addWater('2026-09-26', 1)).toBe(2)
     expect(await addWater('2026-09-26', -5)).toBe(0)
     expect(await addWater('2026-09-26', 100)).toBe(30)
+  })
+})
+
+describe('barcode cache', () => {
+  const off = {
+    name: 'Maggi 2-minutes Noodles',
+    brand: 'Maggi',
+    per100g: { kcal: 437, protein: 10.4, carbs: 44.5, fat: 15.7 },
+    servings: [{ label: 'serving', grams: 70 }],
+    source: 'off' as const,
+    barcode: '8901058851298',
+  }
+
+  it('caches one Open Food Facts row per barcode', async () => {
+    await cacheOffFood(off)
+    await cacheOffFood({ ...off, name: 'Maggi Masala' })
+    const rows = await db.foods.where('barcode').equals(off.barcode).toArray()
+    expect(rows).toHaveLength(1)
+    expect((await foodByBarcode(off.barcode))?.name).toBe('Maggi Masala')
+  })
+
+  it('prefers your own label-scanned product over the Open Food Facts copy', async () => {
+    await cacheOffFood(off)
+    await saveFood({ name: 'Maggi (my label)', per100g: { kcal: 440, protein: 10, carbs: 45, fat: 16 }, servings: [], barcode: off.barcode })
+    expect((await foodByBarcode(off.barcode))?.name).toBe('Maggi (my label)')
+    expect((await customFoodByBarcode(off.barcode))?.source).toBe('custom')
+    expect(await foodByBarcode('0000000000000')).toBeUndefined()
   })
 })

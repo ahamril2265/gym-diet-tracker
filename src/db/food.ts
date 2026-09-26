@@ -4,9 +4,17 @@ import type { Food, FoodLog, ISODate, Meal } from './types'
 
 export type NewLog = Omit<FoodLog, 'id' | 'createdAt'>
 
+let lastCreatedAt = 0
+
+/** Strictly increasing timestamps, so entries added in the same millisecond keep their order. */
+function nextCreatedAt(): number {
+  lastCreatedAt = Math.max(Date.now(), lastCreatedAt + 1)
+  return lastCreatedAt
+}
+
 export async function addLog(log: NewLog): Promise<string> {
   const id = uid()
-  await db.foodLogs.add({ ...log, id, createdAt: Date.now() })
+  await db.foodLogs.add({ ...log, id, createdAt: nextCreatedAt() })
   return id
 }
 
@@ -79,5 +87,37 @@ export async function addWater(date: ISODate, delta: number): Promise<number> {
     const glasses = Math.min(MAX_GLASSES, Math.max(0, current + delta))
     await db.water.put({ date, glasses })
     return glasses
+  })
+}
+
+/**
+ * Local product for a barcode: a label you saved yourself wins over a cached Open Food Facts copy,
+ * so a corrected product is what every later scan uses.
+ */
+export async function foodByBarcode(barcode: string): Promise<Food | undefined> {
+  const list = await db.foods.where('barcode').equals(barcode).toArray()
+  return list.find((f) => f.source === 'custom') ?? list.sort((a, b) => b.updatedAt - a.updatedAt)[0]
+}
+
+/** The user's own (label-scanned or hand-entered) product for a barcode, if any. */
+export async function customFoodByBarcode(barcode: string): Promise<Food | undefined> {
+  return db.foods
+    .where('barcode')
+    .equals(barcode)
+    .filter((f) => f.source === 'custom')
+    .first()
+}
+
+/** Stores an Open Food Facts product locally (one row per barcode) so the next scan works offline. */
+export async function cacheOffFood(food: Omit<Food, 'id' | 'updatedAt'>): Promise<Food> {
+  return db.transaction('rw', db.foods, async () => {
+    const existing = await db.foods
+      .where('barcode')
+      .equals(food.barcode ?? '')
+      .filter((f) => f.source === 'off')
+      .first()
+    const row: Food = { ...food, id: existing?.id ?? `off-${food.barcode}`, source: 'off', updatedAt: Date.now() }
+    await db.foods.put(row)
+    return row
   })
 }

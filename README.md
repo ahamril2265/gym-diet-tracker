@@ -3,8 +3,8 @@
 A personal, local-first fitness PWA: gym sessions, diet (with Indian foods), body metrics and progress.
 All data lives in your browser's IndexedDB on your device. There's no account and no backend.
 
-> **Status:** Phase 3 of 6 (scaffold, goals, workouts, food log). Later phases add camera scanning,
-> progress charts and export. The full README (deploy, Gemini key, install) comes in phase 6.
+> **Status:** Phase 4 of 6 (scaffold, goals, workouts, food log, camera scanning). Later phases add
+> progress charts and export. The full README (deploy, install) comes in phase 6.
 
 ## Requirements
 
@@ -104,3 +104,37 @@ Targets can be overridden on the **Me** screen. Switching goal mode resets to ca
 - **Copy previous day:** empty meals offer to copy the same meal from the day before.
 - **Streak:** consecutive days where you trained or your split had a rest day, counted from your first
   workout. Today doesn't break the streak until it's over.
+
+## Camera scanning
+
+The camera needs HTTPS: use `npm run dev` (self-signed cert) on your phone, or the deployed site.
+
+### Free Gemini API key (for meal photos and nutrition labels)
+
+1. Open [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and sign in with a Google account.
+2. **Create API key** and copy it (starts with `AIza…`).
+3. In the app: **Me → AI food scan** → paste → **Test key**.
+
+The model is set in one place: `GEMINI_MODEL` in `src/lib/ai/config.ts` (currently `gemini-3.8-flash`, a
+free-tier Flash model). The free tier is rate-limited; if you hit it the app says so — wait a minute.
+
+### Meal photo (Eat → camera button, or Today → Scan)
+
+Take or pick a photo → Gemini returns each dish with an Indian household portion (roti, idli, katori…),
+grams, calories, macros, a confidence score and a box on the photo. Adjust quantities with the steppers,
+remove wrong items, pick the meal and add. Low-confidence items are marked **Check this**. Entries keep an
+**AI** tag in the log and can be re-portioned later like any other entry.
+
+### Barcode (Eat → barcode button, or the Meal | Barcode toggle)
+
+Point at an EAN-13 / EAN-8 / UPC code (Chrome on Android uses the built-in detector; iOS uses ZXing), or
+type the number. Lookup order: products saved on your phone → [Open Food Facts](https://world.openfoodfacts.org).
+Found products are cached for offline use. If a product is missing or has no nutrition table, **Snap the
+nutrition label**: Gemini reads the per-100 g values and serving size, you check them, and the product is
+saved under that barcode, so the next scan finds it instantly. "Data wrong?" does the same for products
+Open Food Facts got wrong.
+
+### What leaves your phone
+
+Only meal/label **photos** (to Google, with your key) and **barcodes** (to Open Food Facts). Your key is
+stored in this device's IndexedDB. Nothing else is uploaded.

@@ -63,3 +63,16 @@ export function mealForTime(d: Date = new Date()): Meal {
   if (h < 19) return 'snacks'
   return 'dinner'
 }
+
+const HALF_STEP_UNITS = new Set(['katori', 'small katori', 'plate', 'bowl', 'glass', 'cup', '½ cup', 'serving'])
+
+/** Stepper increment for a unit: measures (katori, glass…) by halves, countable things (roti, idli…) by 1. */
+export function portionStep(unit: string): number {
+  return HALF_STEP_UNITS.has(unit.toLowerCase()) ? 0.5 : 1
+}
+
+/** Next quantity when stepping up/down, snapped to the step (1.5 roti → 2 or 1). Never below one step. */
+export function stepQuantity(qty: number, step: number, dir: 1 | -1): number {
+  const units = dir > 0 ? Math.floor(qty / step + 1e-9) + 1 : Math.ceil(qty / step - 1e-9) - 1
+  return Math.max(step, units * step)
+}

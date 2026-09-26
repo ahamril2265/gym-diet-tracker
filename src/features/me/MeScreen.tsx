@@ -1,10 +1,13 @@
 import { Minus, Pencil, Plus, ShieldCheck } from 'lucide-react'
+import { useEffect } from 'react'
+import { useLocation } from 'react-router'
 import { ButtonLink, IconButton } from '../../components/Button'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Segmented } from '../../components/Segmented'
 import { ScreenSkeleton } from '../../components/Skeleton'
 import { setGoalMode, updateSettings } from '../../db/actions'
 import { useActiveSplit, useProfile, useSettings, useTargets } from '../../hooks/useAppData'
+import { AiKeyCard } from './AiKeyCard'
 import { GoalModePicker } from './GoalModePicker'
 import { ProfileCard } from './ProfileCard'
 import { SplitWeek } from './SplitWeek'
@@ -15,6 +18,13 @@ export default function MeScreen() {
   const settings = useSettings()
   const targets = useTargets()
   const active = useActiveSplit()
+  const { hash } = useLocation()
+  const ready = Boolean(profile && settings && targets && active !== undefined)
+
+  // Links like /me#ai (from the camera screens) jump to that section once it has rendered.
+  useEffect(() => {
+    if (ready && hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' })
+  }, [ready, hash])
 
   if (!profile || !settings || !targets || active === undefined) return <ScreenSkeleton />
 
@@ -97,6 +107,8 @@ export default function MeScreen() {
           onChange={(lengthUnit) => void updateSettings({ lengthUnit })}
         />
       </section>
+
+      <AiKeyCard apiKey={settings.geminiApiKey} />
 
       <p className="flex items-start gap-2 px-1 text-[13px] text-faint">
         <ShieldCheck size={16} className="mt-0.5 shrink-0" aria-hidden="true" />

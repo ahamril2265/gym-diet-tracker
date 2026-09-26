@@ -68,9 +68,16 @@ export default {
           '50%': { opacity: '0.9' },
           '100%': { opacity: '0.55' },
         },
+        // Barcode scan line sweeping inside the scan frame.
+        scanline: {
+          '0%': { top: '8%' },
+          '50%': { top: '92%' },
+          '100%': { top: '8%' },
+        },
       },
       animation: {
         shimmer: 'shimmer 1.4s ease-in-out infinite',
+        scanline: 'scanline 2.4s ease-in-out infinite',
       },
     },
   },
