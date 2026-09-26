@@ -67,6 +67,7 @@ export const router = createBrowserRouter([
             Component: FullScreenLayout,
             children: [
               { path: 'workout/:id', lazy: screen(() => import('../features/workout/WorkoutScreen')) },
+              { path: 'eat/add', lazy: screen(() => import('../features/eat/AddFoodScreen')) },
               { path: 'scan/meal', lazy: screen(() => import('../features/scan/ScanScreen')) },
               { path: 'scan/barcode', lazy: screen(() => import('../features/scan/ScanScreen')) },
             ],

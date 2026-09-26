@@ -3,7 +3,7 @@
 A personal, local-first fitness PWA: gym sessions, diet (with Indian foods), body metrics and progress.
 All data lives in your browser's IndexedDB on your device. There's no account and no backend.
 
-> **Status:** Phase 2 of 6 (scaffold, goals, workouts). Later phases add food logging, camera scanning,
+> **Status:** Phase 3 of 6 (scaffold, goals, workouts, food log). Later phases add camera scanning,
 > progress charts and export. The full README (deploy, Gemini key, install) comes in phase 6.
 
 ## Requirements
@@ -80,3 +80,17 @@ Targets can be overridden on the **Me** screen. Switching goal mode resets to ca
   60 s). It beeps and vibrates at 0 (vibration isn't available on iOS). The screen stays awake during a
   workout where the browser supports it.
 - **Finishing** removes unticked sets. Past workouts open from **Train → History**.
+
+## Food logging
+
+- **Built-in foods:** ~135 common Indian foods (`src/db/seed/indianFoods.ts`), per 100 g as eaten, with
+  household servings: katori ≈ 150 g of a cooked dish, plate of rice ≈ 250 g, glass ≈ 250 ml, tsp 5 g,
+  tbsp 15 g. Values are **approximate** (IFCT 2017 / NIN reference tables plus typical home recipes; oil
+  and recipes vary a lot). Any food can be edited from its portion sheet (pencil icon); your numbers then
+  replace the built-in ones. Past entries keep the values they were logged with.
+- **Search** matches every word against names and common aliases (chapati, dahi, chaas, anda…).
+- **Quick add** logs calories/macros without a food, e.g. a restaurant meal you estimated.
+- **Edit or delete:** tap an entry, or swipe it left for Edit / Delete (with Undo).
+- **Copy previous day:** empty meals offer to copy the same meal from the day before.
+- **Streak:** consecutive days where you trained or your split had a rest day, counted from your first
+  workout. Today doesn't break the streak until it's over.

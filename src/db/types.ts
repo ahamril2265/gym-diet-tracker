@@ -186,6 +186,8 @@ export interface FoodLog {
   /** Human label for the portion, e.g. "2 roti" or "1.5 katori". */
   portionLabel: string
   grams: number
+  /** How the portion was chosen, so editing reopens the same serving and quantity. */
+  serving?: { label: string; grams: number; qty: number }
   /** Macros for this portion, frozen at log time. */
   macros: Macros
   aiScan?: boolean

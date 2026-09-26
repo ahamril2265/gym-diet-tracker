@@ -27,7 +27,7 @@ export function Segmented<T extends string>({ legend, hideLegend, options, value
           <label
             key={o.value}
             className={cx(
-              'flex h-10 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-[10px] px-2 text-[14px] font-bold transition-colors',
+              'flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-[10px] px-2 text-[14px] font-bold transition-colors',
               'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent',
               value === o.value ? 'bg-accent text-on-accent' : 'text-muted',
             )}
