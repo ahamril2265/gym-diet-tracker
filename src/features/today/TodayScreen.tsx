@@ -1,6 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Play } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { ButtonLink } from '../../components/Button'
+import { FlameHem, FlameKanji } from '../../components/FlameHem'
 import { Chip } from '../../components/Chip'
 import { MacroBar } from '../../components/MacroBar'
 import { Ring } from '../../components/Ring'
@@ -60,7 +62,7 @@ export default function TodayScreen() {
       <section className="card flex items-center gap-5 p-5" aria-label="Calories today">
         <Ring
           progress={t.kcal > 0 ? eaten.kcal / t.kcal : 0}
-          colorClass={over ? 'stroke-protein' : 'stroke-accent'}
+          colorClass={over ? 'stroke-flame' : 'stroke-accent'}
           label={`${Math.round(eaten.kcal)} of ${t.kcal} kilocalories eaten`}
         >
           <span className="h-display num text-[34px] leading-none">{Math.abs(Math.round(left)).toLocaleString('en-IN')}</span>
@@ -93,14 +95,14 @@ function SessionCard({
 }) {
   if (!active) {
     return (
-      <section className="rounded-card-lg bg-accent p-5 text-on-accent">
+      <HeroCard>
         <p className="text-[12px] font-extrabold uppercase tracking-[0.12em]">Training</p>
         <h2 className="h-display mt-1 text-[40px]">No split yet</h2>
         <p className="mt-1 text-[14px] font-semibold">Set up your weekly plan to see today's session here.</p>
         <ButtonLink to="/me" variant="dark" block className="mt-4">
           Set up split
         </ButtonLink>
-      </section>
+      </HeroCard>
     )
   }
 
@@ -111,12 +113,12 @@ function SessionCard({
       ? `${plan.next.day.name} ${plan.next.inDays === 1 ? 'tomorrow' : `on ${WEEKDAY_SHORT[(now.getDay() + plan.next.inDays) % 7]}`}`
       : null
     return (
-      <section className="rounded-card-lg bg-accent p-5 text-on-accent">
+      <HeroCard>
         <p className="text-[12px] font-extrabold uppercase tracking-[0.12em]">Today's session</p>
         <h2 className="h-display mt-1 text-[44px]">Rest day</h2>
         <p className="mt-1 text-[14px] font-semibold">Recover, eat your protein, sleep well.</p>
         {nextLabel && <p className="mt-3 text-[14px] font-extrabold">Next up: {nextLabel}</p>}
-      </section>
+      </HeroCard>
     )
   }
 
@@ -131,7 +133,7 @@ function SessionCard({
   )
 
   return (
-    <section className="rounded-card-lg bg-accent p-5 text-on-accent" aria-labelledby="session-h">
+    <HeroCard labelledBy="session-h">
       <p className="text-[12px] font-extrabold uppercase tracking-[0.12em]">Today's session</p>
       <h2 id="session-h" className="h-display mt-1 text-[44px]">
         {plan.day.name} day
@@ -149,6 +151,20 @@ function SessionCard({
       >
         Start workout
       </ButtonLink>
+    </HeroCard>
+  )
+}
+
+/** The gold hero card: flame-hair gold with a crimson flame hem and a faint 炎 mark. */
+function HeroCard({ children, labelledBy }: { children: ReactNode; labelledBy?: string }) {
+  return (
+    <section
+      className="relative isolate overflow-hidden rounded-card-lg bg-accent p-5 pb-[64px] text-on-accent"
+      aria-labelledby={labelledBy}
+    >
+      <FlameKanji className="-right-3 -top-4 -z-10 text-[150px] text-on-accent/10" />
+      {children}
+      <FlameHem height={44} />
     </section>
   )
 }

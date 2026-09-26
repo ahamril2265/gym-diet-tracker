@@ -24,13 +24,19 @@ export function TabBar() {
               end={end}
               className={({ isActive }) =>
                 cx(
-                  'flex h-full min-h-touch flex-col items-center justify-center gap-1 text-[11px] font-bold tracking-[0.02em] transition-colors',
+                  'relative flex h-full min-h-touch flex-col items-center justify-center gap-1 text-[11px] font-bold tracking-[0.02em] transition-colors',
                   isActive ? 'text-accent' : 'text-faint',
                 )
               }
             >
-              <Icon size={24} strokeWidth={2} aria-hidden="true" />
-              <span>{label}</span>
+              {({ isActive }) => (
+                <>
+                  {/* Crimson "flame tip" over the gold active tab */}
+                  {isActive && <span aria-hidden="true" className="absolute top-0 h-[3px] w-8 rounded-b-full bg-flame" />}
+                  <Icon size={24} strokeWidth={2} aria-hidden="true" />
+                  <span>{label}</span>
+                </>
+              )}
             </NavLink>
           </li>
         ))}

@@ -21,7 +21,7 @@ function describe(error: unknown): { title: string; detail: string } {
 export function ErrorPanel({ title, detail }: { title: string; detail: string }) {
   return (
     <div role="alert" className="mx-auto flex min-h-dvh max-w-app flex-col justify-center gap-4 px-6">
-      <TriangleAlert size={36} strokeWidth={2} className="text-protein" aria-hidden="true" />
+      <TriangleAlert size={36} strokeWidth={2} className="text-flame" aria-hidden="true" />
       <h1 className="h-display text-[40px]">{title}</h1>
       <p className="break-words text-muted">{detail}</p>
       <p className="text-[13px] text-faint">Your data is safe — it's stored on this device.</p>

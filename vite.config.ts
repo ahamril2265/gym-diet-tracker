@@ -3,7 +3,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const THEME = '#0D0E0B'
+const THEME = '#0F0B09'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({

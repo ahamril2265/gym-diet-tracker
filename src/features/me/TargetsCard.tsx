@@ -57,7 +57,7 @@ export function TargetsCard({ info }: { info: TargetsInfo }) {
         <h2 id="targets-h" className="h-display text-[24px]">
           Daily targets
         </h2>
-        {info.isCustom ? <Chip tone="protein">Custom</Chip> : <Chip>Calculated</Chip>}
+        {info.isCustom ? <Chip tone="flame">Custom</Chip> : <Chip>Calculated</Chip>}
       </div>
 
       {editing ? (
