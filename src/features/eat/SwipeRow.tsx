@@ -86,7 +86,11 @@ export function SwipeRow({
             if (Math.abs(dx) < DRAG_START || Math.abs(dx) < Math.abs(dy)) return
             moved.current = true
             setDragging(true)
-            e.currentTarget.setPointerCapture(e.pointerId)
+            try {
+              e.currentTarget.setPointerCapture(e.pointerId)
+            } catch {
+              // The pointer can already be gone (e.g. a cancelled touch); dragging still works without capture.
+            }
           }
           setOffset(Math.min(0, Math.max(-ACTIONS_W - 24, s.base + dx)))
         }}

@@ -151,19 +151,26 @@ function LiveWorkout({ data, settings, onFinished }: { data: WorkoutData; settin
       </main>
 
       <ExercisePickerSheet
-        open={picker !== null}
-        title={picker?.mode === 'replace' ? `Replace ${exercises.get(picker.exerciseId)?.name ?? ''}` : 'Add exercise'}
+        open={picker?.mode === 'replace'}
+        title={picker?.mode === 'replace' ? `Replace ${exercises.get(picker.exerciseId)?.name ?? ''}` : ''}
         disabledIds={new Set(order)}
         onClose={() => setPicker(null)}
         onPick={(exId) => {
           const p = picker
           setPicker(null)
-          if (!p) return
-          if (p.mode === 'add') {
-            void addExercise(workout.id, exId).then(() => jumpTo(exId))
-          } else {
-            void replaceExercise(workout.id, p.exerciseId, exId).then(() => setChosen(exId))
-          }
+          if (p?.mode === 'replace') void replaceExercise(workout.id, p.exerciseId, exId).then(() => setChosen(exId))
+        }}
+      />
+      <ExercisePickerSheet
+        open={picker?.mode === 'add'}
+        multiple
+        title="Add exercises"
+        disabledIds={new Set(order)}
+        onClose={() => setPicker(null)}
+        onPickMany={async (ids) => {
+          setPicker(null)
+          for (const exId of ids) await addExercise(workout.id, exId)
+          if (ids[0]) jumpTo(ids[0])
         }}
       />
 

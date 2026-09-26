@@ -19,6 +19,9 @@ export interface ExerciseListProps {
   /** Shown as "Added" and not selectable (e.g. exercises already in the workout). */
   disabledIds?: Set<string>
   autoFocus?: boolean
+  /** Multi-select mode: rows toggle instead of picking, and show their pick order. */
+  selectedIds?: string[]
+  onToggle?: (ex: Exercise) => void
 }
 
 export function filterExercises(all: Exercise[], query: string, muscle: Muscle | 'all', equipment: Equipment | 'all') {
@@ -35,7 +38,7 @@ export function filterExercises(all: Exercise[], query: string, muscle: Muscle |
 }
 
 /** Searchable exercise list grouped by muscle, with muscle chips and an equipment filter. */
-export function ExerciseList({ onSelect, canSelect = () => true, disabledIds, autoFocus }: ExerciseListProps) {
+export function ExerciseList({ onSelect, canSelect = () => true, disabledIds, autoFocus, selectedIds, onToggle }: ExerciseListProps) {
   const all = useLiveQuery(() => db.exercises.orderBy('name').toArray())
   const [query, setQuery] = useState('')
   const [muscle, setMuscle] = useState<Muscle | 'all'>('all')
@@ -114,11 +117,20 @@ export function ExerciseList({ onSelect, canSelect = () => true, disabledIds, au
             <ul>
               {g.items.map((ex) => (
                 <li key={ex.id}>
-                  <ExerciseRow
-                    ex={ex}
-                    disabled={disabledIds?.has(ex.id) ?? false}
-                    onSelect={onSelect && canSelect(ex) ? () => onSelect(ex) : undefined}
-                  />
+                  {onToggle ? (
+                    <ToggleRow
+                      ex={ex}
+                      disabled={disabledIds?.has(ex.id) ?? false}
+                      position={(selectedIds?.indexOf(ex.id) ?? -1) + 1}
+                      onToggle={() => onToggle(ex)}
+                    />
+                  ) : (
+                    <ExerciseRow
+                      ex={ex}
+                      disabled={disabledIds?.has(ex.id) ?? false}
+                      onSelect={onSelect && canSelect(ex) ? () => onSelect(ex) : undefined}
+                    />
+                  )}
                 </li>
               ))}
             </ul>
@@ -153,6 +165,42 @@ function ExerciseRow({ ex, onSelect, disabled }: { ex: Exercise; onSelect?: () =
   return (
     <button type="button" onClick={onSelect} className={cx(cls, 'active:bg-surface-2')}>
       {body}
+    </button>
+  )
+}
+
+/** Multi-select row: a toggle button whose badge shows the order it was picked in (0 = not picked). */
+function ToggleRow({ ex, position, disabled, onToggle }: { ex: Exercise; position: number; disabled: boolean; onToggle: () => void }) {
+  const picked = position > 0
+  return (
+    <button
+      type="button"
+      aria-pressed={picked}
+      disabled={disabled}
+      onClick={onToggle}
+      className={cx(
+        'flex min-h-[60px] w-full items-center gap-3 border-b border-divider px-5 py-2 text-left disabled:opacity-60',
+        picked ? 'bg-accent/10' : 'active:bg-surface-2',
+      )}
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] font-bold text-fg">{ex.name}</span>
+        <span className="block text-[13px] font-semibold text-muted">
+          {EQUIPMENT_LABEL[ex.equipment]} · {ex.isCompound ? 'Compound' : 'Isolation'}
+          {disabled ? ' · already added' : ''}
+        </span>
+      </span>
+      {ex.custom && <Chip className="h-6 px-2 text-[10px]">Custom</Chip>}
+      <span
+        aria-hidden="true"
+        className={cx(
+          'num flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[13px] font-extrabold',
+          picked ? 'border-accent bg-accent text-on-accent' : 'border-border text-transparent',
+          disabled && 'border-border bg-surface-2',
+        )}
+      >
+        {disabled ? <Check size={14} className="text-faint" /> : picked ? position : ''}
+      </span>
     </button>
   )
 }

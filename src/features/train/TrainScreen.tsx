@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { BookOpen, ChevronRight, Pencil, Play, Plus } from 'lucide-react'
+import { BookOpen, CalendarDays, ChevronRight, Pencil, Play, Plus } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button, ButtonLink } from '../../components/Button'
 import { Chip } from '../../components/Chip'
@@ -70,13 +70,15 @@ export default function TrainScreen() {
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 id="split-h" className="h-display text-[26px]">
-              Your split
+              Routines
             </h2>
             {split && <p className="truncate text-[14px] font-bold text-muted">{split.split.name}</p>}
           </div>
-          <ButtonLink to="/train/split" variant="ghost" size="sm" icon={<Pencil size={16} aria-hidden="true" />}>
-            {split ? 'Edit' : 'Set up'}
-          </ButtonLink>
+          {split && (
+            <ButtonLink to="/train/split" variant="ghost" size="sm" icon={<CalendarDays size={16} aria-hidden="true" />}>
+              Edit week
+            </ButtonLink>
+          )}
         </div>
 
         {split ? (
@@ -94,12 +96,16 @@ export default function TrainScreen() {
           ))
         ) : (
           <div className="card p-5">
-            <p className="text-[15px] text-muted">No split yet. Pick a template or build your own week.</p>
-            <ButtonLink to="/train/split" className="mt-4" block>
-              Set up split
+            <p className="text-[15px] text-muted">No routines yet. Build your own by picking exercises, or start from a template.</p>
+            <ButtonLink to="/train/split" variant="surface" className="mt-4" block>
+              Use a template
             </ButtonLink>
           </div>
         )}
+
+        <ButtonLink to="/train/routine/new" block icon={<Plus size={18} aria-hidden="true" />}>
+          Create routine
+        </ButtonLink>
 
         <Button
           variant="surface"
@@ -188,15 +194,24 @@ function DayCard({
           {weekdays.length ? ` · ${weekdays.map((d) => WEEKDAY_SHORT[d]).join(', ')}` : ''}
         </p>
       </div>
-      <Button
-        size="sm"
-        variant={isToday ? 'accent' : 'surface'}
-        disabled={disabled}
-        onClick={onStart}
-        icon={<Play size={14} fill="currentColor" aria-hidden="true" />}
-      >
-        Start
-      </Button>
+      <div className="flex shrink-0 items-center gap-1">
+        <Link
+          to={`/train/routine/${day.id}`}
+          aria-label={`Edit ${day.name}`}
+          className="flex h-11 w-11 items-center justify-center rounded-btn-sm text-muted active:bg-surface-2"
+        >
+          <Pencil size={18} aria-hidden="true" />
+        </Link>
+        <Button
+          size="sm"
+          variant={isToday ? 'accent' : 'surface'}
+          disabled={disabled}
+          onClick={onStart}
+          icon={<Play size={14} fill="currentColor" aria-hidden="true" />}
+        >
+          Start
+        </Button>
+      </div>
     </article>
   )
 }

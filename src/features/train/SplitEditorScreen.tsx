@@ -1,20 +1,19 @@
-import { ArrowDown, ArrowUp, Check, ChevronLeft, Plus, Trash } from 'lucide-react'
+import { Check, ChevronLeft, Plus, Trash } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Button, IconButton } from '../../components/Button'
 import { Field } from '../../components/Field'
-import { NumberInput } from '../../components/NumberInput'
 import { Select } from '../../components/Select'
 import { ScreenSkeleton } from '../../components/Skeleton'
-import { MUSCLE_LABEL } from '../../db/seed/exercises'
 import { SPLIT_TEMPLATES, type SplitTemplate } from '../../db/seed/splitTemplates'
 import { applyTemplate, createBlankSplit, saveSplit } from '../../db/splits'
-import type { Exercise, Split, SplitDay, SplitExercise } from '../../db/types'
+import type { Exercise, Split, SplitDay } from '../../db/types'
 import { DEFAULT_TARGET } from '../../db/workouts'
 import { useActiveSplit, useExerciseMap, type ActiveSplit } from '../../hooks/useAppData'
 import { uid } from '../../lib/id'
 import { WEEK_ORDER, WEEKDAY_SHORT } from '../../lib/date'
 import { ExercisePickerSheet } from '../exercises/ExercisePickerSheet'
+import { ExercisePlanList } from './ExercisePlanList'
 
 const WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const
 
@@ -78,25 +77,6 @@ function Editor({ initial, exercises }: { initial: ActiveSplit; exercises: Map<s
 
   const updateDay = (id: string, patch: Partial<SplitDay>) =>
     setDays((ds) => ds.map((d) => (d.id === id ? { ...d, ...patch } : d)))
-
-  const updateExercise = (dayId: string, index: number, patch: Partial<SplitExercise>) =>
-    setDays((ds) =>
-      ds.map((d) =>
-        d.id === dayId ? { ...d, exercises: d.exercises.map((e, i) => (i === index ? { ...e, ...patch } : e)) } : d,
-      ),
-    )
-
-  const moveExercise = (dayId: string, index: number, dir: -1 | 1) =>
-    setDays((ds) =>
-      ds.map((d) => {
-        if (d.id !== dayId) return d
-        const list = [...d.exercises]
-        const j = index + dir
-        if (j < 0 || j >= list.length) return d
-        ;[list[index], list[j]] = [list[j]!, list[index]!]
-        return { ...d, exercises: list }
-      }),
-    )
 
   const removeDay = (day: SplitDay) => {
     if (!window.confirm(`Delete ${day.name}? Past workouts are kept.`)) return
@@ -186,84 +166,13 @@ function Editor({ initial, exercises }: { initial: ActiveSplit; exercises: Map<s
               </IconButton>
             </div>
 
-            {day.exercises.length === 0 ? (
-              <p className="rounded-btn border border-dashed border-border p-4 text-center text-[14px] text-muted">
-                No exercises yet
-              </p>
-            ) : (
-              <ol className="flex flex-col divide-y divide-divider">
-                {day.exercises.map((e, i) => {
-                  const ex = exercises.get(e.exerciseId)
-                  const name = ex?.name ?? 'Unknown exercise'
-                  return (
-                    <li key={`${e.exerciseId}-${i}`} className="flex flex-col gap-2 py-3">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="min-w-0 truncate text-[15px] font-bold">{name}</span>
-                        {ex && <span className="shrink-0 text-[12px] font-bold text-faint">{MUSCLE_LABEL[ex.muscle]}</span>}
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <NumberInput
-                          label={`${name} sets`}
-                          value={e.sets}
-                          min={1}
-                          max={10}
-                          onValue={(sets) => updateExercise(day.id, i, { sets })}
-                          className="w-12"
-                        />
-                        <span className="text-[13px] font-bold text-faint" aria-hidden="true">
-                          ×
-                        </span>
-                        <NumberInput
-                          label={`${name} minimum reps`}
-                          value={e.repMin}
-                          min={1}
-                          max={100}
-                          onValue={(repMin) => updateExercise(day.id, i, { repMin, repMax: Math.max(repMin, e.repMax) })}
-                          className="w-12"
-                        />
-                        <span className="text-[13px] font-bold text-faint" aria-hidden="true">
-                          –
-                        </span>
-                        <NumberInput
-                          label={`${name} maximum reps`}
-                          value={e.repMax}
-                          min={1}
-                          max={100}
-                          onValue={(repMax) => updateExercise(day.id, i, { repMax, repMin: Math.min(repMax, e.repMin) })}
-                          className="w-12"
-                        />
-                        <div className="ml-auto flex">
-                          <IconButton label={`Move ${name} up`} variant="ghost" disabled={i === 0} onClick={() => moveExercise(day.id, i, -1)}>
-                            <ArrowUp size={18} aria-hidden="true" />
-                          </IconButton>
-                          <IconButton
-                            label={`Move ${name} down`}
-                            variant="ghost"
-                            disabled={i === day.exercises.length - 1}
-                            onClick={() => moveExercise(day.id, i, 1)}
-                          >
-                            <ArrowDown size={18} aria-hidden="true" />
-                          </IconButton>
-                          <IconButton
-                            label={`Remove ${name}`}
-                            variant="ghost"
-                            onClick={() => updateDay(day.id, { exercises: day.exercises.filter((_, j) => j !== i) })}
-                          >
-                            <Trash size={18} aria-hidden="true" />
-                          </IconButton>
-                        </div>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ol>
-            )}
+            <ExercisePlanList items={day.exercises} exercises={exercises} onChange={(list) => updateDay(day.id, { exercises: list })} />
             <Button variant="surface" size="sm" icon={<Plus size={16} aria-hidden="true" />} onClick={() => setPickerFor(day.id)}>
-              Add exercise
+              Add exercises
             </Button>
           </article>
         ))}
-        <Button variant="surface" block icon={<Plus size={18} aria-hidden="true" />} onClick={addDay} disabled={days.length >= 7}>
+        <Button variant="surface" block icon={<Plus size={18} aria-hidden="true" />} onClick={addDay}>
           Add day
         </Button>
       </section>
@@ -281,9 +190,10 @@ function Editor({ initial, exercises }: { initial: ActiveSplit; exercises: Map<s
         title={`Add to ${pickerDay?.name ?? ''}`}
         onClose={() => setPickerFor(null)}
         disabledIds={new Set(pickerDay?.exercises.map((e) => e.exerciseId))}
-        onPick={(exerciseId) => {
+        multiple
+        onPickMany={(ids) => {
           if (pickerDay) {
-            updateDay(pickerDay.id, { exercises: [...pickerDay.exercises, { exerciseId, ...DEFAULT_TARGET }] })
+            updateDay(pickerDay.id, { exercises: [...pickerDay.exercises, ...ids.map((exerciseId) => ({ exerciseId, ...DEFAULT_TARGET }))] })
           }
           setPickerFor(null)
         }}

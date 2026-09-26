@@ -142,10 +142,10 @@ function SessionCard({
     return (
       <HeroCard>
         <p className="text-[12px] font-extrabold uppercase tracking-[0.12em]">Training</p>
-        <h2 className="h-display mt-1 text-[40px]">No split yet</h2>
-        <p className="mt-1 text-[14px] font-semibold">Set up your weekly plan to see today's session here.</p>
-        <ButtonLink to="/train/split" variant="dark" block className="mt-4">
-          Set up split
+        <h2 className="h-display mt-1 text-[40px]">No routines yet</h2>
+        <p className="mt-1 text-[14px] font-semibold">Build a routine from your favourite exercises, or start from a template.</p>
+        <ButtonLink to="/train/routine/new" variant="dark" block className="mt-4">
+          Create routine
         </ButtonLink>
       </HeroCard>
     )

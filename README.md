@@ -68,6 +68,16 @@ from `public/logo.svg` (see `pwa-assets.config.ts`).
 
 Targets can be overridden on the **Me** screen. Switching goal mode resets to calculated values.
 
+## Routines
+
+- **Create your own:** Train → **Create routine** → tick exercises in the library (they're numbered in the
+  order you tap them) → set sets × rep range, reorder → name it (or keep the suggested name, e.g.
+  "Chest & Back") → optionally pick the weekdays it repeats on → **Save** or **Save & start now**.
+- Routines are the days of your weekly split: scheduled ones show on Today, and any routine can be started
+  from Train. Picking a weekday another routine uses moves that day to the new routine.
+- Edit or delete a routine with the pencil on its card; **Edit week** shows the whole weekly schedule.
+  Applying a template replaces all routines (workout history is kept).
+
 ## How workouts are tracked
 
 - **Prefill / PREVIOUS:** a new session copies the last session of each exercise: warm-ups are repeated and

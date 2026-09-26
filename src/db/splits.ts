@@ -1,7 +1,7 @@
 import { uid } from '../lib/id'
 import { db } from './db'
 import { instantiateTemplate, type SplitTemplate } from './seed/splitTemplates'
-import type { Split, SplitDay } from './types'
+import type { Split, SplitDay, SplitExercise } from './types'
 
 /** Writes a split and exactly this list of days (days removed from the list are deleted). */
 export async function saveSplit(split: Split, days: SplitDay[]): Promise<void> {
@@ -43,4 +43,55 @@ export async function createBlankSplit(): Promise<string> {
   const splitId = uid()
   const day: SplitDay = { id: uid(), splitId, name: 'Day A', order: 0, exercises: [] }
   return replaceActive({ id: splitId, name: 'My split', schedule: Array(7).fill(null), createdAt: Date.now() }, [day])
+}
+
+export interface RoutineInput {
+  /** Existing routine (split day) to update; omit to create a new one. */
+  id?: string
+  name: string
+  exercises: SplitExercise[]
+  /** `Date#getDay()` indexes this routine should be scheduled on. Other routines on those days are unscheduled. */
+  weekdays: number[]
+}
+
+/**
+ * Creates or updates a routine. Routines are the days of your weekly split, so a new routine is added to
+ * the active split (a "My routines" split is created if you don't have one). Returns the routine id.
+ */
+export async function saveRoutine(input: RoutineInput): Promise<string> {
+  return db.transaction('rw', db.splits, db.splitDays, db.settings, async () => {
+    const settings = await db.settings.get('app')
+    let split = settings?.activeSplitId ? await db.splits.get(settings.activeSplitId) : undefined
+    if (!split) {
+      split = { id: uid(), name: 'My routines', schedule: Array(7).fill(null), createdAt: Date.now() }
+      await db.splits.add(split)
+      await db.settings.update('app', { activeSplitId: split.id })
+    }
+    const existing = input.id ? await db.splitDays.get(input.id) : undefined
+    const days = await db.splitDays.where('splitId').equals(split.id).toArray()
+    const day: SplitDay = {
+      id: existing?.id ?? uid(),
+      splitId: split.id,
+      name: input.name.trim(),
+      order: existing?.order ?? days.reduce((max, d) => Math.max(max, d.order + 1), 0),
+      exercises: input.exercises,
+    }
+    await db.splitDays.put(day)
+    const schedule = split.schedule.map((current, dow) =>
+      input.weekdays.includes(dow) ? day.id : current === day.id ? null : current,
+    )
+    await db.splits.update(split.id, { schedule })
+    return day.id
+  })
+}
+
+/** Deletes a routine and clears it from the weekly schedule. Past workouts keep their own copy of the name. */
+export async function deleteRoutine(id: string): Promise<void> {
+  await db.transaction('rw', db.splits, db.splitDays, async () => {
+    const day = await db.splitDays.get(id)
+    if (!day) return
+    await db.splitDays.delete(id)
+    const split = await db.splits.get(day.splitId)
+    if (split) await db.splits.update(split.id, { schedule: split.schedule.map((d) => (d === id ? null : d)) })
+  })
 }
