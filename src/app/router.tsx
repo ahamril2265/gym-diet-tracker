@@ -55,6 +55,8 @@ export const router = createBrowserRouter([
             children: [
               { index: true, lazy: screen(() => import('../features/today/TodayScreen')) },
               { path: 'train', lazy: screen(() => import('../features/train/TrainScreen')) },
+              { path: 'train/exercises', lazy: screen(() => import('../features/exercises/ExerciseLibraryScreen')) },
+              { path: 'train/split', lazy: screen(() => import('../features/train/SplitEditorScreen')) },
               { path: 'eat', lazy: screen(() => import('../features/eat/EatScreen')) },
               { path: 'progress', lazy: screen(() => import('../features/progress/ProgressScreen')) },
               { path: 'progress/body', lazy: screen(() => import('../features/progress/BodyScreen')) },

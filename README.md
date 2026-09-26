@@ -3,8 +3,8 @@
 A personal, local-first fitness PWA: gym sessions, diet (with Indian foods), body metrics and progress.
 All data lives in your browser's IndexedDB on your device. There's no account and no backend.
 
-> **Status:** Phase 1 of 6 (scaffold, onboarding, goals and targets). Later phases add workouts, food logging,
-> camera scanning, progress charts and export. The full README (deploy, Gemini key, install) comes in phase 6.
+> **Status:** Phase 2 of 6 (scaffold, goals, workouts). Later phases add food logging, camera scanning,
+> progress charts and export. The full README (deploy, Gemini key, install) comes in phase 6.
 
 ## Requirements
 
@@ -67,3 +67,16 @@ from `public/logo.svg` (see `pwa-assets.config.ts`).
 - Protein 2.0 g/kg (2.2 g/kg on a cut), fat 0.9 g/kg, carbs fill the remaining calories
 
 Targets can be overridden on the **Me** screen. Switching goal mode resets to calculated values.
+
+## How workouts are tracked
+
+- **Prefill / PREVIOUS:** a new session copies the last session of each exercise: warm-ups are repeated and
+  working sets take the matching set's kg × reps (extra planned sets copy the last one).
+- **Estimated 1RM (Epley):** `kg × (1 + reps / 30)`. Warm-up sets never count.
+- **PR:** a ticked working set that beats your best estimated 1RM, or lifts more than ever before for that
+  many reps (or more). An exercise's first session only sets the baseline, so it shows no PRs.
+- **Volume:** Σ kg × reps over ticked working sets.
+- **Rest timer:** starts when you tick a set (compound vs accessory defaults in **Me**; warm-ups rest up to
+  60 s). It beeps and vibrates at 0 (vibration isn't available on iOS). The screen stays awake during a
+  workout where the browser supports it.
+- **Finishing** removes unticked sets. Past workouts open from **Train → History**.

@@ -6,8 +6,10 @@ import './index.css'
 import { App } from './app/App'
 import { db } from './db/db'
 import { initDb } from './db/init'
+import { installRestAlarm } from './lib/restAlarm'
 
 const root = createRoot(document.getElementById('root')!)
+installRestAlarm()
 
 initDb(db)
   .then(() => {

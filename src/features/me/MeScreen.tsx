@@ -1,5 +1,5 @@
-import { Minus, Plus, ShieldCheck } from 'lucide-react'
-import { IconButton } from '../../components/Button'
+import { Minus, Pencil, Plus, ShieldCheck } from 'lucide-react'
+import { ButtonLink, IconButton } from '../../components/Button'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { Segmented } from '../../components/Segmented'
 import { ScreenSkeleton } from '../../components/Skeleton'
@@ -53,7 +53,9 @@ export default function MeScreen() {
         ) : (
           <p className="mt-2 text-[14px] text-muted">No split yet.</p>
         )}
-        <p className="mt-3 text-[13px] text-faint">The split editor arrives in phase 2.</p>
+        <ButtonLink to="/train/split" variant="surface" size="sm" className="mt-4" icon={<Pencil size={16} aria-hidden="true" />}>
+          {active ? 'Edit split' : 'Set up split'}
+        </ButtonLink>
       </section>
 
       <section className="card flex flex-col gap-5 p-5" aria-labelledby="training-h">

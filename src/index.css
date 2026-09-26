@@ -81,6 +81,28 @@
   .input[aria-invalid='true'] {
     @apply border-danger;
   }
+
+  /* Bottom sheet on native <dialog> */
+  .sheet {
+    @apply m-0 mt-auto w-full max-w-app rounded-t-card-lg border border-b-0 border-border bg-surface p-0 text-fg;
+    margin-inline: auto;
+    max-height: 88dvh;
+  }
+
+  .sheet[open] {
+    animation: sheet-up 180ms ease-out;
+  }
+
+  .sheet::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(24px);
+      opacity: 0.6;
+    }
+  }
 }
 
 @layer utilities {

@@ -1,20 +1,29 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Play } from 'lucide-react'
-import type { ReactNode } from 'react'
-import { ButtonLink } from '../../components/Button'
-import { FlameHem, FlameKanji } from '../../components/FlameHem'
+import { Button, ButtonLink } from '../../components/Button'
 import { Chip } from '../../components/Chip'
+import { HeroCard } from '../../components/HeroCard'
 import { MacroBar } from '../../components/MacroBar'
 import { Ring } from '../../components/Ring'
 import { ScreenSkeleton } from '../../components/Skeleton'
 import { db } from '../../db/db'
 import { MUSCLE_LABEL } from '../../db/seed/exercises'
 import type { Exercise, Macros, Settings } from '../../db/types'
-import { useActiveSplit, useExerciseMap, useProfile, useSettings, useTargets, type ActiveSplit } from '../../hooks/useAppData'
+import {
+  useActiveSplit,
+  useActiveWorkout,
+  useExerciseMap,
+  useProfile,
+  useSettings,
+  useTargets,
+  type ActiveSplit,
+} from '../../hooks/useAppData'
 import { planForDate } from '../../lib/calc/schedule'
 import { estimateSessionMinutes } from '../../lib/calc/workoutTime'
 import { formatHeaderDate, toISODate, WEEKDAY_SHORT } from '../../lib/date'
 import { GOAL_LABEL } from '../me/profileDraft'
+import { ResumeCard } from '../workout/ResumeCard'
+import { useStartWorkout } from '../workout/useStartWorkout'
 
 const ZERO: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 }
 
@@ -37,11 +46,14 @@ export default function TodayScreen() {
   const profile = useProfile()
   const settings = useSettings()
   const targets = useTargets()
-  const active = useActiveSplit()
+  const split = useActiveSplit()
+  const workout = useActiveWorkout()
   const exercises = useExerciseMap()
   const eaten = useEatenToday()
 
-  if (!profile || !settings || !targets || active === undefined || !exercises || !eaten) return <ScreenSkeleton />
+  if (!profile || !settings || !targets || split === undefined || workout === undefined || !exercises || !eaten) {
+    return <ScreenSkeleton />
+  }
 
   const now = new Date()
   const t = targets.targets
@@ -55,7 +67,7 @@ export default function TodayScreen() {
         <h1 className="h-display mt-1 break-words text-[40px]">Let's go, {profile.name}</h1>
         <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
           <Chip tone="accent">{GOAL_LABEL[profile.goal]} mode</Chip>
-          {active && <Chip>{active.split.name}</Chip>}
+          {split && <Chip>{split.split.name}</Chip>}
         </div>
       </header>
 
@@ -77,7 +89,11 @@ export default function TodayScreen() {
         </div>
       </section>
 
-      <SessionCard active={active} exercises={exercises} settings={settings} now={now} />
+      {workout ? (
+        <ResumeCard workout={workout} />
+      ) : (
+        <SessionCard active={split} exercises={exercises} settings={settings} now={now} />
+      )}
     </div>
   )
 }
@@ -93,13 +109,15 @@ function SessionCard({
   settings: Settings
   now: Date
 }) {
+  const { start, starting } = useStartWorkout()
+
   if (!active) {
     return (
       <HeroCard>
         <p className="text-[12px] font-extrabold uppercase tracking-[0.12em]">Training</p>
         <h2 className="h-display mt-1 text-[40px]">No split yet</h2>
         <p className="mt-1 text-[14px] font-semibold">Set up your weekly plan to see today's session here.</p>
-        <ButtonLink to="/me" variant="dark" block className="mt-4">
+        <ButtonLink to="/train/split" variant="dark" block className="mt-4">
           Set up split
         </ButtonLink>
       </HeroCard>
@@ -142,29 +160,16 @@ function SessionCard({
       <p className="num mt-0.5 text-[14px] font-semibold">
         {dayExercises.length} lifts · ~{minutes} min
       </p>
-      <ButtonLink
-        to={`/workout/new?day=${plan.day.id}`}
+      <Button
         variant="dark"
         block
         className="mt-4"
+        disabled={starting}
+        onClick={() => void start(plan.day!.id)}
         icon={<Play size={18} fill="currentColor" aria-hidden="true" />}
       >
         Start workout
-      </ButtonLink>
+      </Button>
     </HeroCard>
-  )
-}
-
-/** The gold hero card: flame-hair gold with a crimson flame hem and a faint 炎 mark. */
-function HeroCard({ children, labelledBy }: { children: ReactNode; labelledBy?: string }) {
-  return (
-    <section
-      className="relative isolate overflow-hidden rounded-card-lg bg-accent p-5 pb-[64px] text-on-accent"
-      aria-labelledby={labelledBy}
-    >
-      <FlameKanji className="-right-3 -top-4 -z-10 text-[150px] text-on-accent/10" />
-      {children}
-      <FlameHem height={44} />
-    </section>
   )
 }

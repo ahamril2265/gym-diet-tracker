@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
-import type { Exercise, MacroTargets, Profile, Settings, Split, SplitDay } from '../db/types'
+import type { Exercise, MacroTargets, Profile, Settings, Split, SplitDay, Workout } from '../db/types'
+import { getActiveWorkout } from '../db/workouts'
 import { calcTargets } from '../lib/calc/targets'
 
 /** `undefined` while loading. */
@@ -57,4 +58,9 @@ export function useActiveSplit(): ActiveSplit | null | undefined {
 /** All exercises keyed by id. */
 export function useExerciseMap(): Map<string, Exercise> | undefined {
   return useLiveQuery(async () => new Map((await db.exercises.toArray()).map((e) => [e.id, e])))
+}
+
+/** The in-progress workout: `undefined` while loading, `null` when none. */
+export function useActiveWorkout(): Workout | null | undefined {
+  return useLiveQuery(async () => (await getActiveWorkout()) ?? null)
 }

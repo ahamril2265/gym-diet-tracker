@@ -131,6 +131,8 @@ export interface Workout {
   /** Exercise ids in session order (drives "Up next"). */
   exerciseOrder: string[]
   exerciseNotes: Record<string, string>
+  /** Planned sets/reps per exercise (from the split day, or defaults for added exercises). */
+  targets: Record<string, { sets: number; repMin: number; repMax: number }>
 }
 
 export interface WorkoutSet {
@@ -140,8 +142,9 @@ export interface WorkoutSet {
   /** Denormalised from the workout for fast history queries. */
   date: ISODate
   order: number
-  kg: number
-  reps: number
+  /** `null` until entered. Always stored in kg. */
+  kg: number | null
+  reps: number | null
   isWarmup: boolean
   done: boolean
   rpe?: number
