@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: theme('colors.bg');
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.accent');
+    outline-offset: 2px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    touch-action: manipulation;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Big Shoulders Display 800, uppercase: headings and big numbers */
+  .h-display {
+    @apply font-display font-extrabold uppercase leading-[0.95] tracking-[0.01em];
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Small-caps style label, e.g. "SAT · 26 SEP" */
+  .eyebrow {
+    @apply text-[12px] font-bold uppercase tracking-[0.12em] text-muted;
+  }
+
+  .card {
+    @apply rounded-card border border-border bg-surface;
+  }
+
+  .input {
+    @apply h-12 w-full rounded-btn border border-border bg-surface-2 px-4 text-[16px] font-semibold text-fg placeholder:text-faint;
+    @apply focus:border-accent focus:outline-none focus-visible:outline-none;
+  }
+
+  .input[aria-invalid='true'] {
+    @apply border-danger;
+  }
+}
+
+@layer utilities {
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
