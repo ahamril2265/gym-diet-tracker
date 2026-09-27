@@ -9,6 +9,7 @@ import { Select } from '../../components/Select'
 import { addPhoto, deletePhoto } from '../../db/body'
 import { db } from '../../db/db'
 import type { BodyWeight, ISODate, PhotoPose, ProgressPhoto, WeightUnit } from '../../db/types'
+import { describeFailure } from '../../app/GlobalNotices'
 import { useBlobUrl } from '../../hooks/useBlobUrl'
 import { fromISODate } from '../../lib/date'
 import { formatShortDate } from '../../lib/format'
@@ -49,8 +50,8 @@ export function PhotosCard({ unit }: { unit: WeightUnit }) {
     try {
       // Keep plenty of detail for comparisons but cap the size (~200–400 KB each).
       await addPhoto(pose, await compressImage(file, 1600, 0.85))
-    } catch {
-      setError('That file couldn’t be saved as a photo.')
+    } catch (e) {
+      setError(describeFailure(e)?.startsWith('Your phone is out of space') ? describeFailure(e) : 'That file couldn’t be saved as a photo.')
     } finally {
       setBusy(false)
     }

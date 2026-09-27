@@ -37,7 +37,11 @@ export function WeightCard({ unit }: { unit: WeightUnit }) {
   const visible = range === 'all' ? series : series.filter((p) => p.date >= addDays(today, -Number(range)))
   const points = visible.map((p) => ({ date: p.date, kg: conv(p.kg), trend: conv(p.trend) }))
   const all = points.flatMap((p) => [p.kg, p.trend])
-  const ticks = all.length ? niceTicks(Math.min(...all), Math.max(...all)) : [0, 1]
+  // Pad tiny ranges to at least 2 units so ticks land on whole or half kilos.
+  const lo = all.length ? Math.min(...all) : 0
+  const hi = all.length ? Math.max(...all) : 1
+  const pad = Math.max(0, (2 - (hi - lo)) / 2)
+  const ticks = niceTicks(lo - pad, hi + pad)
 
   const latest = summary.latest
   return (
@@ -67,7 +71,11 @@ export function WeightCard({ unit }: { unit: WeightUnit }) {
         </dl>
       </section>
 
-      {series.length > 0 && (
+      {series.length === 1 && (
+        <p className="card p-4 text-[14px] text-muted">Log a few more weigh-ins to see your trend line — mornings before breakfast work best.</p>
+      )}
+
+      {series.length > 1 && (
         <>
           <Segmented legend="Chart range" hideLegend options={RANGES} value={range} onChange={setRange} />
           <ChartCard

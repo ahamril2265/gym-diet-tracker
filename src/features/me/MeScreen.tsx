@@ -8,6 +8,8 @@ import { ScreenSkeleton } from '../../components/Skeleton'
 import { setGoalMode, updateSettings } from '../../db/actions'
 import { useActiveSplit, useProfile, useSettings, useTargets } from '../../hooks/useAppData'
 import { AiKeyCard } from './AiKeyCard'
+import { DataCard } from './DataCard'
+import { RemindersCard } from './RemindersCard'
 import { GoalModePicker } from './GoalModePicker'
 import { ProfileCard } from './ProfileCard'
 import { SplitWeek } from './SplitWeek'
@@ -109,6 +111,10 @@ export default function MeScreen() {
       </section>
 
       <AiKeyCard apiKey={settings.geminiApiKey} />
+
+      <RemindersCard settings={settings} />
+
+      <DataCard />
 
       <p className="flex items-start gap-2 px-1 text-[13px] text-faint">
         <ShieldCheck size={16} className="mt-0.5 shrink-0" aria-hidden="true" />

@@ -26,6 +26,7 @@ import { GOAL_LABEL } from '../me/profileDraft'
 import { ResumeCard } from '../workout/ResumeCard'
 import { LastSessionCard } from './LastSessionCard'
 import { QuickTiles } from './QuickTiles'
+import { ReminderBanner } from './ReminderBanner'
 import { useLastSession, useStreak } from './useTodayData'
 import { useStartWorkout } from '../workout/useStartWorkout'
 
@@ -91,6 +92,8 @@ export default function TodayScreen() {
           {split && <Chip>{split.split.name}</Chip>}
         </div>
       </header>
+
+      <ReminderBanner />
 
       <section className="card flex items-center gap-5 p-5" aria-label="Calories today">
         <Ring

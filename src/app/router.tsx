@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { createBrowserRouter, Outlet, redirect, ScrollRestoration } from 'react-router'
 import { db } from '../db/db'
 import { FullScreenLayout, TabLayout } from './AppLayout'
+import { GlobalNotices } from './GlobalNotices'
 import { RouteError } from './RouteError'
 import { UpdatePrompt } from './UpdatePrompt'
 
@@ -26,6 +27,7 @@ function Root() {
       <Outlet />
       <ScrollRestoration />
       <UpdatePrompt />
+      <GlobalNotices />
     </div>
   )
 }
