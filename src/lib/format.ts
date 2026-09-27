@@ -52,3 +52,8 @@ const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
 export function formatShortDate(d: Date): string {
   return `${WEEKDAY_SHORT[d.getDay()]} ${d.getDate()} ${MONTH_SHORT[d.getMonth()]}`
 }
+
+/** "26 Sep" (for chart axes). */
+export function formatDayMonth(d: Date): string {
+  return `${d.getDate()} ${MONTH_SHORT[d.getMonth()]}`
+}

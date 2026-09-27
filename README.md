@@ -3,8 +3,8 @@
 A personal, local-first fitness PWA: gym sessions, diet (with Indian foods), body metrics and progress.
 All data lives in your browser's IndexedDB on your device. There's no account and no backend.
 
-> **Status:** Phase 4 of 6 (scaffold, goals, workouts, food log, camera scanning). Later phases add
-> progress charts and export. The full README (deploy, install) comes in phase 6.
+> **Status:** Phase 5 of 6 (scaffold, goals, workouts, food log, camera scanning, progress). Phase 6 adds
+> export/import, reminders and polish. The full README (deploy, install) comes in phase 6.
 
 ## Requirements
 
@@ -133,6 +133,20 @@ Found products are cached for offline use. If a product is missing or has no nut
 nutrition label**: Gemini reads the per-100 g values and serving size, you check them, and the product is
 saved under that barcode, so the next scan finds it instantly. "Data wrong?" does the same for products
 Open Food Facts got wrong.
+
+## Progress & body
+
+- **Strength:** workouts in the last 12 weeks, volume in the last 7 days vs the 7 before, PRs this month;
+  estimated-1RM chart per lift (Epley) with the 12-week gain (best of the first 2 weeks vs best of the last
+  2, so one light session doesn't flip it); recent PRs; working sets per muscle this week against a 10–20
+  set zone (bars outside it are orange and labelled Low/High); a 12-week consistency heatmap.
+- **Nutrition:** average calories and protein vs target over the last 7 and 30 *complete* days (today is
+  excluded until it's over), and days on target (kcal within ±10 %, protein ≥ 90 % of target).
+- **Body:** latest weight, 7-day moving average (mean of weigh-ins in the 7 calendar days ending that
+  day), change this month; chart of daily weigh-ins vs the trend with a 30D/90D/1Y/All range. Measurements
+  with the change vs the previous reading. Progress photos (front/side/back) saved as Blobs in IndexedDB on
+  the device — never uploaded — with a side-by-side compare.
+- Every chart has a **table view** (the grid icon) with the exact numbers.
 
 ### What leaves your phone
 

@@ -43,6 +43,13 @@ export function bestsOf(sets: SetLike[]): Bests {
   return b
 }
 
+/** Bests with `sets` added (the input is not modified). */
+export function withSets(b: Bests, sets: SetLike[]): Bests {
+  const next: Bests = { e1rm: b.e1rm, kgByReps: { ...b.kgByReps }, count: b.count }
+  for (const s of sets) if (isCountedSet(s) && s.kg > 0) addToBests(next, s.kg, s.reps)
+  return next
+}
+
 /** Heaviest kg ever lifted for at least `reps` reps, or `undefined` if never done that many. */
 export function heaviestForAtLeast(b: Bests, reps: number): number | undefined {
   let best: number | undefined
